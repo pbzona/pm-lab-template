@@ -1,0 +1,11 @@
+---
+description: Overall project architecture and conventions
+globs:
+alwaysApply: true
+---
+- This is a Next.js app router project with Supabase auth and Drizzle ORM.
+- All database tables live in a Postgres schema defined by the DATABASE_SCHEMA env var. Never use the public schema.
+- Use Server Actions for all data mutations. Do not create API routes for CRUD operations.
+- Use Drizzle ORM for all database queries. Never use raw SQL or the Supabase client for data access.
+- Use the Supabase client only for authentication operations.
+- All pages under /dashboard are protected and require authentication.

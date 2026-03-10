@@ -1,0 +1,11 @@
+---
+description: Authentication patterns
+globs: src/**/*auth* , src/middleware.ts
+alwaysApply: false
+---
+- Use @supabase/ssr for all auth operations in the app router.
+- Server-side: use createServerClient from src/lib/supabase/server.ts
+- Client-side: use createBrowserClient from src/lib/supabase/client.ts
+- The middleware in src/middleware.ts handles session refresh. Do not modify it.
+- To protect a page, check the session in the Server Component and redirect if not authenticated.
+- Never expose SUPABASE_SERVICE_ROLE_KEY to the client.

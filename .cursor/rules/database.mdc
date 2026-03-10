@@ -1,0 +1,11 @@
+---
+description: Database conventions and schema guidance
+globs: src/db/**
+alwaysApply: false
+---
+- All tables are defined in src/db/schema.ts using Drizzle's pgSchema().
+- Do NOT modify the schema file directly. Schema changes must go through the central team.
+- When querying, always import from src/db/schema.ts and use the Drizzle query builder.
+- Use uuid for all primary keys.
+- Include createdAt and updatedAt timestamps on all tables.
+- Reference @src/db/schema.ts for the current table definitions.
