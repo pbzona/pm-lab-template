@@ -4,6 +4,8 @@ import { desc } from "drizzle-orm";
 import { ItemTable } from "@/components/item-table";
 import { ItemForm } from "@/components/item-form";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
   const allItems = await db
     .select()

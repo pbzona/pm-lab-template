@@ -4,16 +4,8 @@ import { db } from "@/db";
 import { items } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
 
 export async function createItem(formData: FormData) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("You must be logged in to create items");
-  }
-
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
 
@@ -25,7 +17,6 @@ export async function createItem(formData: FormData) {
     title,
     description: description || null,
     status: "draft",
-    createdBy: user.id,
   });
 
   revalidatePath("/dashboard");
