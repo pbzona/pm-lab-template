@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,50 +13,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
+import { signInAction } from "@/actions/auth";
+import { signUpAction } from "@/actions/auth";
+import type { AuthResult } from "@/actions/auth";
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const action = mode === "login" ? signInAction : signUpAction;
+  const [state, formAction, isPending] = useActionState<
+    AuthResult | null,
+    FormData
+  >(action, null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setMessage(null);
-    setLoading(true);
-
-    try {
-      const supabase = createClient();
-      if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-        router.push("/dashboard");
-        router.refresh();
-      } else {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        if (error) throw error;
-        if (data.user && !data.session) {
-          setMessage("Check your email for a confirmation link.");
-          return;
-        }
-        router.push("/dashboard");
-        router.refresh();
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const error = state && "error" in state ? state.error : null;
+  const message = state && "message" in state ? state.message : null;
 
   return (
     <Card className="w-full max-w-md">
@@ -70,7 +37,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             : "Create an account to get started."}
         </CardDescription>
       </CardHeader>
-      <form onSubmit={handleSubmit}>
+      <form action={formAction}>
         <CardContent className="space-y-4">
           {error && (
             <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
@@ -86,10 +53,9 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
+              name="email"
               type="email"
               placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -97,18 +63,17 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             <Label htmlFor="password">Password</Label>
             <Input
               id="password"
+              name="password"
               type="password"
               placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
             />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending
               ? "Loading..."
               : mode === "login"
                 ? "Log in"
